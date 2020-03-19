@@ -37,14 +37,11 @@ if __name__ == "__main__":
 				fifty_miles = 0
 				state_any = 0
 				hundred_miles = 0
-				state_data = states.get(full_state)
-				if not state_data:
-					print('no state data for {}'.format(full_state))
-					continue
-				for s in state_data:
+				for s in us_covid:
 					cases = int(s.get('cases', 0))
 					case_lat = s.get('latitude')
 					case_long = s.get('longitude')
+					state = s.get('province')
 
 					miles_distance = distance.distance((case_lat, case_long), (lat, long)).miles
 					if miles_distance <= 5:
@@ -55,7 +52,8 @@ if __name__ == "__main__":
 						fifty_miles += cases
 					if miles_distance <= 100:
 						hundred_miles += cases
-					state_any += cases
+					if state == full_state:
+						state_any += cases
 
 				row = list(r)
 				row.append(five_miles)

@@ -140,8 +140,8 @@ cache = dict()
 
 
 def get_location(street, city, state, zip):
-	address = '{}, {}  {}'.format(city, state, zip)
-	address_alt = '{}, {}'.format(city, state)
+	address = '{} {}, {} {}'.format(street, city, state, zip)
+	address_alt = '{}, {} {}'.format(city, state, zip)
 	print(address)
 	geolocator = Nominatim(user_agent="covid_snf_scraper_{}".format(zip))
 	try:
