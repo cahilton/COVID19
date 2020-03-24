@@ -86,40 +86,41 @@ def get_csse_covid_data():
 		cr = csv.DictReader(decoded_content.splitlines(), delimiter=',')
 		my_list = list(cr)
 		for row in my_list:
-			country = row.get('Country/Region')
-			state = row.get('Province/State')
+			country = row.get('Country_Region')
+			state = row.get('Province_State')
 			confirmed = row.get('Confirmed', 0)
 			if country == 'US':
 				us_data[state] = row
 				us_count += int(confirmed)
-	return us_data, us_count
+	return us_data, us_count, my_list
 
 
 def get_health_map_covid_data():
 	global millis
-	covid_data_req = requests.get('https://www.healthmap.org/covid-19/ncov2019.unique-locations.json?nocache={}'.
-	                              format(millis))
+	health_map_data = list()
+	# health_map_data = requests.get('https://www.healthmap.org/covid-19/ncov2019.unique-locations.json?nocache={}'.
+	#                               format(millis))
+	#
+	# if covid_data_req.status_code == 200:
+	# 	outside_hubei = health_map_data.json().get('outside_Hubei', list())
+	# else:
+	# 	print('failed to get latest covid data')
+	# 	sys.exit(1)
+	#
+	# if len(outside_hubei) == 0:
+	# 	print('failed to get latest covid data')
+	# 	sys.exit(1)
 
-	if covid_data_req.status_code == 200:
-		outside_hubei = covid_data_req.json().get('outside_Hubei', list())
-	else:
-		print('failed to get latest covid data')
-		sys.exit(1)
+	csse_data, csse_us_count, rows = get_csse_covid_data()
 
-	if len(outside_hubei) == 0:
-		print('failed to get latest covid data')
-		sys.exit(1)
-
-	csse_data, csse_us_count = get_csse_covid_data()
-
-	us_covid = [loc for loc in outside_hubei if loc.get('country') == "United States"]
+	us_covid = [loc for loc in rows if loc.get('Country_Region') == "US"]
 	us_cases = 0
 	states = dict()
 	state_cases = dict()
 	states['Other'] = list()
 	for us in us_covid:
-		us_cases += us.get('cases', 0)
-		state = us.get('province')
+		us_cases += int(us.get('Confirmed', 0))
+		state = us.get('Province_State')
 		if len(state) > 0:
 			if state not in states:
 				states[state] = list()
@@ -130,7 +131,7 @@ def get_health_map_covid_data():
 	for state in states.keys():
 		state_count = 0
 		for loc in states[state]:
-			state_count += loc.get('cases', 0)
+			state_count += int(loc.get('Confirmed', 0))
 		state_cases[state] = state_count
 
 	return us_covid, us_cases, state_cases, states, csse_data, csse_us_count
@@ -196,4 +197,6 @@ def update_snf_data():
 if __name__ == "__main__":
 	print(millis)
 
-	update_snf_data()
+	# update_snf_data()
+	us_covid, us_cases, state_cases, states, csse_data, csse_us_count = get_health_map_covid_data()
+	print(csse_data)
